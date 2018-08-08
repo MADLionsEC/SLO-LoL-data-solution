@@ -112,11 +112,7 @@ matches_raw_data/
 *.csv
 *.xlsx
 slds/msgbox.vbs
-*.xlsx#
 *.iml
-<<<<<<< HEAD
-=======
-slds/tests.ipynb
-slds/db_test.ipynb
->>>>>>> origin/develop
 *.ipynb
+*.ipynb
+slds/.pytest_cache
