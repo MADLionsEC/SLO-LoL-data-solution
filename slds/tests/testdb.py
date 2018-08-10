@@ -89,7 +89,7 @@ class TestDatabase(unittest.TestCase):
                     # Merge Solo Q players info with data
                     if league == SOLOQ:
                         player_info_df = get_soloq_dataframe(db.mongo_players)
-                        self.final_df = final_df.merge(player_info_df, left_on='currentAccountId', right_on='account_id',
+                        self.dict1[key]['export_df'] = final_df.merge(player_info_df, left_on='currentAccountId', right_on='account_id',
                                                 how='left')
 
                     print('\tGames exported.')
@@ -104,7 +104,7 @@ class TestDatabase(unittest.TestCase):
             self.assertIsNotNone(self.dict1[key]['current'])
             self.assertIsNotNone(self.dict1[key]['new'])
             self.assertIsNotNone(self.dict1[key]['stored'])
-        self.assertIsNotNone(self.final_df)
+            self.assertIsNotNone(self.dict1[key]['export_df'])
 
 
 if __name__ == '__main__':
