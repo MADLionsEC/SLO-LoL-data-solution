@@ -85,6 +85,7 @@ class TestDatabase(unittest.TestCase):
                         df = pd.DataFrame(self.dict1[key]['stored']).rename(columns={0: 'game_id', 1: 'realm'})
                     concatenated_df = db.concat_games(df)
                     final_df = concatenated_df
+                    self.dict1[key]['export_df'] = final_df
 
                     # Merge Solo Q players info with data
                     if league == SOLOQ:
