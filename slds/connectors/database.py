@@ -230,6 +230,9 @@ class DataBase:
                 print('\tLooking for games played on patch {}.'.format(patch))
                 regex_patch = '^' + '{}'.format(patch).replace('.', r'\.')
                 mongo_query['gameVersion'] = {'$regex': regex_patch}
+            if kwargs['team_abbv'] is not None or kwargs['competition'] is not None:
+                acc_ids = self.get_account_ids(**kwargs)
+                mongo_query['participantIdentities.player.currentAccountId'] = {'$in': acc_ids}
             if kwargs['begin_time'] is not None:
                 print('\tLooking for games past {} at 00:00:00.'.format(kwargs['begin_time']))
                 timestamp = self.__str_date_to_timestamp(kwargs['begin_time'])
@@ -244,9 +247,6 @@ class DataBase:
                 except KeyError:
                     mongo_query['gameCreation'] = {}
                     mongo_query['gameCreation']['$lte'] = timestamp
-            if kwargs['team_abbv'] is not None or kwargs['competition'] is not None:
-                acc_ids = self.get_account_ids(**kwargs)
-                mongo_query['participantIdentities.player.currentAccountId'] = {'$in': acc_ids}
         else:
             game_id = 'game_id'
             realm = 'realm'
@@ -257,6 +257,20 @@ class DataBase:
             if kwargs['season']:
                 print('\tLooking for games played in season {}.'.format(kwargs['season']))
                 mongo_query['season'] = int(kwargs['season'])
+            if kwargs['begin_time'] is not None:
+                print('\tLooking for games past {} at 00:00:00.'.format(kwargs['begin_time']))
+                timestamp = self.__str_date_to_timestamp(kwargs['begin_time'])
+                mongo_query['timestamp'] = {}
+                mongo_query['timestamp']['$gte'] = timestamp
+            if kwargs['end_time'] is not None:
+                print('\tLooking for games before {} at 23:59:59.'.format(kwargs['end_time']))
+                td1 = timedelta(hours=23, minutes=59, seconds=59)
+                timestamp = self.__str_date_to_timestamp(kwargs['end_time'], td1)
+                try:
+                    mongo_query['timestamp']['$lte'] = timestamp
+                except KeyError:
+                    mongo_query['timestamp'] = {}
+                    mongo_query['timestamp']['$lte'] = timestamp
 
         games = coll.find(mongo_query, {'_id': 0, game_id: 1, realm: 1})
         return [(g[game_id], g[realm]) for g in games]
@@ -329,8 +343,7 @@ def parse_args(args, api_key):
             print('\t{} games found.'.format(len(stored_game_ids)))
             if league != SOLOQ:
                 info_df = get_league_dataframe(db.mongo_cnx.slds.get_collection(league.lower()))
-                info_df['gid_realm'] = info_df.apply(lambda x: str(x['game_id']) + '_' + str(x['realm']),
-                                                             axis=1)
+                info_df['gid_realm'] = info_df.apply(lambda x: str(x['game_id']) + '_' + str(x['realm']), axis=1)
                 ls1 = [str(g[0]) + '_' + str(g[1]) for g in stored_game_ids]
                 df = info_df.loc[info_df['gid_realm'].isin(ls1)]
             else:

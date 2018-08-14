@@ -87,13 +87,11 @@ class TestDatabase(unittest.TestCase):
                     final_df = concatenated_df
                     self.dict1[key]['export_df'] = final_df
 
-
                     # Merge Solo Q players info with data
                     if league == SOLOQ:
                         player_info_df = get_soloq_dataframe(db.mongo_players)
                         self.dict1[key]['export_df'] = final_df.merge(player_info_df, left_on='currentAccountId', right_on='account_id',
                                                 how='left')
-                                                          
                     print('\tGames exported.')
             finally:
                 db.close_connections()
